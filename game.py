@@ -6,14 +6,31 @@ class Game:
     def __init__(self):
         pygame.init()
 
-        self.window = pygame.display.set_mode((600, 600))
         self.clock = pygame.time.Clock()
         self.running = True
 
         self.player = Player()
         self.projectiles = []
+        self.enemies = []
 
-    def start(self):
+    def start(self, window):
+
+        # noinspection PyAttributeOutsideInit
+        self.window = window
+
+        Enemy.spawn(10, 10)
+        Enemy.spawn(55, 10)
+        Enemy.spawn(100, 10)
+        Enemy.spawn(145, 10)
+        Enemy.spawn(190, 10)
+        Enemy.spawn(235, 10)
+        Enemy.spawn(280, 10)
+        Enemy.spawn(325, 10)
+        Enemy.spawn(370, 10)
+        Enemy.spawn(415, 10)
+        Enemy.spawn(460, 10)
+        Enemy.spawn(505, 10)
+        Enemy.spawn(550, 10)
 
         pygame.display.set_caption("Space Invaders")
 
@@ -31,6 +48,9 @@ class Game:
 
             for projectile in self.projectiles:
                 projectile.tick()
+
+            for enemy in self.enemies:
+                enemy.draw()
 
             pygame.display.flip()
             pygame.display.update()
@@ -73,10 +93,11 @@ class Player:
             Projectile(True, self).fire()
 
     def move(self, right):
-        if right:
+
+        if right and self.x < (600 - self.vel - 80):
             self.x += self.vel
 
-        else:
+        elif not right and self.x > self.vel:
             self.x -= self.vel
 
 
@@ -97,6 +118,13 @@ class Projectile:
         pygame.draw.rect(game.window, (255, 255, 255), (self.x, self.y, 3, 8))
 
     def tick(self):
+
+        if self.is_touching_enemy():
+            self.despawn()
+
+        if self.is_touching_wall():
+            self.despawn()
+
         if self.north:
             self.y -= 5
 
@@ -105,8 +133,45 @@ class Projectile:
 
         self.draw()
 
+    def is_touching_enemy(self):
+        touching = False
+
+        for enemy in game.enemies:
+            if enemy.y <= self.x <= enemy.x+40 and enemy.y <= self.y <= enemy.y + 40:
+                touching = True
+                enemy.despawn()
+                break
+
+        return touching
+
+    def is_touching_wall(self):
+        return self.y <= 0 or self.y >= 600
+
+    def despawn(self):
+        game.projectiles.remove(self)
+
+
+class Enemy:
+
+    @staticmethod
+    def spawn(x, y):
+        game.enemies.append(Enemy(x, y))
+
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def draw(self):
+        pygame.draw.rect(game.window, (255, 255, 255), (self.x, self.y, 40, 40))
+
+    def tick(self):
+        self.draw()
+
+    def despawn(self):
+        game.enemies.remove(self)
+
 
 game = Game()
 
 if __name__ == "__main__":
-    game.start()
+    game.start(pygame.display.set_mode((600, 600)))
