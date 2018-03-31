@@ -11,26 +11,21 @@ class Game:
 
         self.player = Player()
         self.projectiles = []
-        self.enemies = []
+        self.enemies = {}
+        self.enemies_by_line = {}
+
+        self.lowest_line = 0
 
     def start(self, window):
 
         # noinspection PyAttributeOutsideInit
         self.window = window
 
-        Enemy.spawn(10, 10)
-        Enemy.spawn(55, 10)
-        Enemy.spawn(100, 10)
-        Enemy.spawn(145, 10)
-        Enemy.spawn(190, 10)
-        Enemy.spawn(235, 10)
-        Enemy.spawn(280, 10)
-        Enemy.spawn(325, 10)
-        Enemy.spawn(370, 10)
-        Enemy.spawn(415, 10)
-        Enemy.spawn(460, 10)
-        Enemy.spawn(505, 10)
-        Enemy.spawn(550, 10)
+        Enemy.spawn_new_line()
+        Enemy.spawn_new_line()
+        Enemy.spawn_new_line()
+
+        print(self.enemies)
 
         pygame.display.set_caption("Space Invaders")
 
@@ -49,8 +44,8 @@ class Game:
             for projectile in self.projectiles:
                 projectile.tick()
 
-            for enemy in self.enemies:
-                enemy.draw()
+            for location in self.enemies:
+                self.enemies[location].draw()
 
             pygame.display.flip()
             pygame.display.update()
@@ -61,15 +56,23 @@ class Game:
         if keys[pygame.K_LEFT]:
             self.player.move(False)
 
-        elif keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT]:
             self.player.move(True)
 
         if keys[pygame.K_SPACE]:
             self.player.fire_projectile()
 
+    def move_down(self, row):
+        self.enemies_by_line[row-1] = self.enemies_by_line[row]
+
+        for enemy in self.enemies_by_line[row-1]:
+            enemy.y += 50
+
+            del self.enemies[(enemy.x, enemy.y-50)]
+            self.enemies[(enemy.x, enemy.y)] = enemy
+
 
 class Player:
-
     def __init__(self):
         self.x = 250
         self.y = 540
@@ -136,10 +139,12 @@ class Projectile:
     def is_touching_enemy(self):
         touching = False
 
-        for enemy in game.enemies:
-            if enemy.y <= self.x <= enemy.x+40 and enemy.y <= self.y <= enemy.y + 40:
+        for location in game.enemies:
+            enemy = game.enemies[location]
+
+            if enemy.x <= self.x <= enemy.x+40 and enemy.y <= self.y <= enemy.y + 40:
                 touching = True
-                enemy.despawn()
+                del game.enemies[location]
                 break
 
         return touching
@@ -154,21 +159,62 @@ class Projectile:
 class Enemy:
 
     @staticmethod
+    def spawn_new_line():
+        if 2 in game.enemies_by_line.keys():
+            game.move_down(2)
+
+        if 3 in game.enemies_by_line.keys():
+            game.move_down(3)
+
+        if 4 in game.enemies_by_line.keys():
+            game.move_down(4)
+
+        if 5 in game.enemies_by_line.keys():
+            game.move_down(5)
+
+        game.enemies_by_line[5] = []
+
+        Enemy.spawn(10, 50)
+        Enemy.spawn(55, 50)
+        Enemy.spawn(100, 50)
+        Enemy.spawn(145, 50)
+        Enemy.spawn(190, 50)
+        Enemy.spawn(235, 50)
+        Enemy.spawn(280, 50)
+        Enemy.spawn(325, 50)
+        Enemy.spawn(370, 50)
+        Enemy.spawn(415, 50)
+        Enemy.spawn(460, 50)
+        Enemy.spawn(505, 50)
+        Enemy.spawn(550, 50)
+
+    @staticmethod
     def spawn(x, y):
-        game.enemies.append(Enemy(x, y))
+        enemy = Enemy(x, y)
+
+        game.enemies[(x, y)] = enemy
+        game.enemies_by_line[5].append(enemy)
 
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        self.image = pygame.image.load("enemy.png")
+
+    def __str__(self):
+        return "Enemy at: {}".format(self.location)
+
+    def __repr__(self):
+        return "Enemy.spawn({})".format(self.location)
+
+    @property
+    def location(self):
+        return self.x, self.y
 
     def draw(self):
-        pygame.draw.rect(game.window, (255, 255, 255), (self.x, self.y, 40, 40))
+        game.window.blit(self.image, self.location)
 
     def tick(self):
         self.draw()
-
-    def despawn(self):
-        game.enemies.remove(self)
 
 
 game = Game()
