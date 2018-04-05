@@ -1,6 +1,8 @@
+# Imports
 import pygame
 
 
+# Class to represent the game.
 class Game:
 
     def __init__(self):
@@ -15,9 +17,11 @@ class Game:
         self.enemies_by_line = {}
 
         self.lowest_line = 0
+        self.extra_rows = 0
+        self.round = 1
+        self.enemy_fire_cooldown = 100
 
     def start(self, window):
-
         # noinspection PyAttributeOutsideInit
         self.window = window
 
@@ -71,7 +75,23 @@ class Game:
             del self.enemies[(enemy.x, enemy.y-50)]
             self.enemies[(enemy.x, enemy.y)] = enemy
 
+    def get_rows_for_round(self):
+        return (self.round // 3) + 1
 
+    def next_round(self):
+        self.round += 1
+        
+        start_rows = self.get_rows_for_round()
+
+        if start_rows > 6:
+            self.extra_rows = (6-start_rows)*(-1)
+            start_rows = 6
+
+        for x in range(self.start_rows):
+            
+
+
+# Class to represent the player.
 class Player:
     def __init__(self):
         self.x = 250
@@ -104,6 +124,7 @@ class Player:
             self.x -= self.vel
 
 
+# Class to represent a projectile
 class Projectile:
 
     def __init__(self, north, entity):
@@ -156,6 +177,7 @@ class Projectile:
         game.projectiles.remove(self)
 
 
+# Class to represent an enemy.
 class Enemy:
 
     @staticmethod
@@ -217,7 +239,9 @@ class Enemy:
         self.draw()
 
 
+# Create a new game.
 game = Game()
 
+# Start the game if this module is run directly.
 if __name__ == "__main__":
     game.start(pygame.display.set_mode((600, 600)))
