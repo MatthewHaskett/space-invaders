@@ -76,6 +76,7 @@ class Game:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+                    pygame.quit()
 
             for projectile in self.projectiles:
                 projectile.tick()
