@@ -18,16 +18,14 @@ class Game:
 
         self.lowest_line = 0
         self.extra_rows = 0
-        self.round = 1
+        self.round = 0
         self.enemy_fire_cooldown = 100
 
     def start(self, window):
         # noinspection PyAttributeOutsideInit
         self.window = window
 
-        Enemy.spawn_new_line()
-        Enemy.spawn_new_line()
-        Enemy.spawn_new_line()
+        self.next_round()
 
         print(self.enemies)
 
@@ -88,7 +86,7 @@ class Game:
             start_rows = 6
 
         for x in range(self.start_rows):
-            
+            Enemy.spawn_new_line()
 
 
 # Class to represent the player.
@@ -116,7 +114,6 @@ class Player:
             Projectile(True, self).fire()
 
     def move(self, right):
-
         if right and self.x < (600 - self.vel - 80):
             self.x += self.vel
 
