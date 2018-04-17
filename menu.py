@@ -14,15 +14,15 @@ class Menu:
  
         # Create window, and variables to control game loop.
         self.running = True
-        self.window = pygame.display.set_mode(600, 600)
+        self.window = pygame.display.set_mode((600, 600))
         self.clock = pygame.time.Clock()
 
         # Load the font.
-        self.font = pygame.font.Font("LCD_Solid.tff", 80)
+        self.font = pygame.font.Font("LCD_Solid.ttf", 80)
 
         # Render required text using the font.
-        self.play_text = self.font.render("PLAY")
-        self.high_scores_text = self.font.render("TOP")
+        self.play_text = self.font.render("PLAY", True, (0, 0, 0))
+        self.high_scores_text = self.font.render("TOP", True, (0, 0, 0))
  
     # Function to open the window.
     def start(self):
@@ -39,7 +39,7 @@ class Menu:
             mouse_pressed = pygame.mouse.get_pressed()[0]
 
             # Check if the mouse is over the play button.
-            if 200 <= mouse_pos[0] <= 400 and 300 <= mouse_pos[1] <= 400
+            if 200 <= mouse_pos[0] <= 400 and 300 <= mouse_pos[1] <= 400:
 
                 # Fill the play button in white.
                 pygame.draw.rect(self.window, (255, 255, 255), (200, 300, 200, 100))
@@ -53,7 +53,7 @@ class Menu:
                 pygame.draw.rect(self.window, (200, 200, 200), (200, 300, 200, 100))
 
             # Check if the mouse is over the high scores button.
-            if 200 <= mouse_pos[0] <= 400 and 450 <= mouse_pos[1] <= 550
+            if 200 <= mouse_pos[0] <= 400 and 450 <= mouse_pos[1] <= 550:
 
                 # Fill the high score button white.
                 pygame.draw.rect(self.window, (255, 255, 255), (200, 450, 200, 550))
@@ -68,7 +68,7 @@ class Menu:
 
             # Put text on top of buttons.
             self.window.blit(self.play_text, (210, 310))
-            self.window.blit(self.high_scores_text, (210, 460)
+            self.window.blit(self.high_scores_text, (210, 460))
 
             # Check if game has been exited, stop loop if so.
             for event in pygame.event.get():
@@ -84,7 +84,7 @@ class Menu:
 
         # Stop the menu running and start the game.
         self.running = False
-        game.start(self.window)
+        game.game.start(self.window)
  
     # Method to show high scores.
     def high_scores(self):

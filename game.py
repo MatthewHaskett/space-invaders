@@ -17,11 +17,11 @@ class Game:
         self.enemies = {}
         self.enemies_by_line = {}
 
-        self.lowest_line = 0
+        self.lowest_line = 5
         self.extra_rows = 0
         self.round = 0
         self.enemy_fire_cooldown = 100
-        self.row_move_cooldown = 1000
+        self.row_move_cooldown = 0
 
     def start(self, window):
         # noinspection PyAttributeOutsideInit
@@ -44,16 +44,10 @@ class Game:
             self.enemy_fire_cooldown -= 1
             self.row_move_cooldown -= 1
 
-            if self.enemy_fire_cooldown == 0:
-                self.enemy_fire_cooldown = 100
-
-                rand = random.randint(len(self.enemies_by_line[self.lowest_line]))
-                Projectile(False, self.enemies_by_line[self.lowest_line][rand]).fire()
-
             if self.row_move_cooldown == 0:
                 self.row_move_cooldown = 1000
 
-                if self.extra_lines > 0
+                if self.extra_lines > 0:
                     Enemy.spawn_new_line()
                     self.extra_lines -= 1
 
@@ -72,6 +66,12 @@ class Game:
 
                     if 5 in self.enemies_by_line.keys():
                         self.move_down(5)
+
+            if self.enemy_fire_cooldown == 0:
+                self.enemy_fire_cooldown = 100
+
+                rand = random.randint(0, len(self.enemies_by_line[self.lowest_line]))
+                Projectile(False, self.enemies_by_line[self.lowest_line][rand]).fire()
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -110,6 +110,8 @@ class Game:
             del self.enemies[(enemy.x, enemy.y-50)]
             self.enemies[(enemy.x, enemy.y)] = enemy
 
+            enemy.line = row-1
+
     def get_rows_for_round(self):
         return (self.round // 3) + 1
 
@@ -122,11 +124,12 @@ class Game:
             self.extra_rows = (5 - start_rows) * (-1)
             start_rows = 5
 
-        for x in range(self.start_rows):
+        for x in range(start_rows):
             Enemy.spawn_new_line()
 
     def lose(self):
         pass
+
 
 # Class to represent the player.
 class Player:
@@ -221,10 +224,14 @@ class Projectile:
             return touching
          
         if game.player.x <= self.x <= game.player.x + 40 and game.player.y <= self.y <= game.player.y + 80:
-            touching = True
+            touching = True
+
             game.player.lives -= 1
 
-       return touching
+            if game.player.lives < 1:
+                game.lose()
+
+        return touching
 
     def despawn(self):
         game.projectiles.remove(self)
@@ -277,6 +284,7 @@ class Enemy:
         self.x = x
         self.y = y
         self.image = pygame.image.load("enemy.png")
+        self.line = 5
 
     def __str__(self):
         return "Enemy at: {}".format(self.location)
@@ -296,12 +304,12 @@ class Enemy:
 
     def despawn(self):
         del game.enemies[self.location]
-        game.enemies_by_line[self.x / 50].remove(self)
+        game.enemies_by_line[self.line].remove(self)
 
         game.player.score += 1
 
-        if len(game.enemies_by_line[self.x / 50]) < 1:
-            del game.enemies_by_line[self.x / 50]
+        if len(game.enemies_by_line[self.line]) < 1:
+            del game.enemies_by_line[self.line]
 
         if len(game.enemies_by_line.keys()) < 1 and len(game.enemies.keys()) < 1:
             game.next_round()
