@@ -23,6 +23,8 @@ class Game:
         self.enemy_fire_cooldown = 100
         self.row_move_cooldown = 0
 
+        self.font = pygame.font.Font("LCD_Solid.ttf", 30)
+
     def start(self, window):
         # noinspection PyAttributeOutsideInit
         self.window = window
@@ -70,6 +72,7 @@ class Game:
             if self.enemy_fire_cooldown == 0:
                 self.enemy_fire_cooldown = 100
 
+                print(self.lowest_line)
                 rand = random.randint(0, len(self.enemies_by_line[self.lowest_line]))
                 Projectile(False, self.enemies_by_line[self.lowest_line][rand]).fire()
 
@@ -84,8 +87,24 @@ class Game:
             for location in self.enemies:
                 self.enemies[location].draw()
 
+            self.window.blit(self.font.render("Score: " + str(self.player.score), True, (255, 255, 255)), (10, 10))
+            self.window.blit(self.font.render("Lives: " + str(self.player.lives), True, (255, 255, 255)), (450, 10))
+
+            # game.player.x <= self.x <= game.player.x + 80 and game.player.y+20 <= self.y <= game.player.y + 40
+            
+            pygame.draw.rect(self.window, (255, 0, 0), (self.player.x, self.player.y+20, 80, 40), 5)
+            
             pygame.display.flip()
             pygame.display.update()
+
+        self.window.fill((0, 0, 0))
+
+        self.window.blit(self.font.render("You lose!", True, (255, 255, 255)), (200, 200))
+        self.window.blit(self.font.render("Score: " + str(self.player.score), True, (255, 255, 255)), (250, 240))
+        self.window.blit(self.font.render("Lives: " + str(self.player.lives), True, (255, 255, 255)), (250, 280))
+        
+        pygame.display.flip()
+        pygame.display.update()
 
     def check_movement(self):
         keys = pygame.key.get_pressed()
@@ -128,7 +147,7 @@ class Game:
             Enemy.spawn_new_line()
 
     def lose(self):
-        pass
+        self.running = False
 
 
 # Class to represent the player.
@@ -223,7 +242,7 @@ class Projectile:
         if self.north:
             return touching
          
-        if game.player.x <= self.x <= game.player.x + 40 and game.player.y <= self.y <= game.player.y + 80:
+        if game.player.x <= self.x <= game.player.x + 80 and game.player.y+20 <= self.y <= game.player.y + 40:
             touching = True
 
             game.player.lives -= 1
@@ -310,6 +329,9 @@ class Enemy:
 
         if len(game.enemies_by_line[self.line]) < 1:
             del game.enemies_by_line[self.line]
+
+            if game.lowest_line != 5:
+                game.lowest_line += 1
 
         if len(game.enemies_by_line.keys()) < 1 and len(game.enemies.keys()) < 1:
             game.next_round()
