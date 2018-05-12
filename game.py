@@ -21,6 +21,7 @@ class Game:
         self.extra_rows = 0
         self.round = 0
         self.enemy_fire_cooldown = 100
+        self.enemy_fire_cooldown_cap = 100
         self.row_move_cooldown = 0
 
         self.font = pygame.font.Font("LCD_Solid.ttf", 30)
@@ -70,7 +71,7 @@ class Game:
                         self.move_down(5)
 
             if self.enemy_fire_cooldown == 0:
-                self.enemy_fire_cooldown = 100
+                self.enemy_fire_cooldown = self.enemy_fire_cooldown_cap
 
                 print(self.lowest_line)
                 rand = random.randint(0, len(self.enemies_by_line[self.lowest_line]))
@@ -145,6 +146,9 @@ class Game:
 
         for x in range(start_rows):
             Enemy.spawn_new_line()
+
+        if self.enemy_fire_cooldown_cap > 40:
+            self.enemy_fire_cooldown_cap -= 1
 
     def lose(self):
         self.running = False
